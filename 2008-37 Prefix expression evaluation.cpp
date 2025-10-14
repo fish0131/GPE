@@ -1,54 +1,58 @@
-#include <bits/stdc++.h>
+#include<bits/stdc++.h>
 using namespace std;
 
 string s;
 
-int evaluatePrefix(string s) {
-    stack<int> st;
+bool evaluatePrefix(string s, long long &res) {
+	stack<int> st;
     vector<string> tokens;
     stringstream ss(s);
     string tok;
     while (ss >> tok) tokens.push_back(tok);
-
-    for (int i = tokens.size() - 1; i >= 0; i--) {
-        string t = tokens[i];
-        if (isdigit(t[0]) || (t.size() > 1 && isdigit(t[1]))) st.push(stoi(t));
-		else {
-            // 遇到運算子，必須至少有兩個數字
-            if (st.size() < 2) {
-                cout << "illegal" << '\n';
-        		return 0;
-            }
-            int o1 = st.top(); st.pop();
-            int o2 = st.top(); st.pop();
-            if (t == "+") st.push(o1 + o2);
-            else if (t == "-") st.push(o1 - o2);
-            else if (t == "*") st.push(o1 * o2);
-            else if (t == "/") st.push(o1 / o2);
-            else if (t == "%") st.push(o1 % o2);
-            else {
-                cout << "illegal" << '\n';
-        		return 0;
-            }
-        }
-    }
-
-    // 結果必須只剩一個值
-    if (st.size() != 1) {
-        cout << "illegal" << '\n';
-        return 0;
-    }
-    return st.top();
+    
+    for(int i = tokens.size() - 1; i >= 0; i--) {
+    	string t = tokens[i];
+    	if(isdigit(t[0]) || (t[0] == '-' && t.size() > 1 && isdigit(t[1]))) st.push(stoi(t));
+    	else {
+    		if(st.size() < 2) {
+    			return false;
+			}
+			int o1 = st.top();
+			st.pop();
+			int o2 = st.top();
+			st.pop();
+			if(t == "+") st.push(o1 + o2);
+			else if(t == "-") st.push(o1 - o2);
+			else if(t == "*") st.push(o1 * o2);
+			else if(t == "/") {
+				if (o2 == 0) return false; // 除以零
+                st.push(o1 / o2);
+			} 
+			else if(t == "%") {
+				if (o2 == 0) return false; // 取mod零
+                st.push(o1 % o2);
+			}
+			else {
+				return false;
+			}
+		}
+	}
+	
+	if(st.size() != 1) {
+		return false;
+	}
+	res = st.top();
+    return true;
 }
 
 int main() {
-    while (getline(cin, s) && s != ".") {
-        try {
-            cout << evaluatePrefix(s) << '\n';
-        }
-		catch (...) {
-            cout << "illegal" << '\n';
-        }
-    }
-    return 0;
+	while(getline(cin, s) && s != ".") {
+		long long res;
+		if(evaluatePrefix(s, res)) {
+			cout << res << '\n';
+		}
+		else {
+			cout << "illegal" << '\n';
+		}
+	}
 }
